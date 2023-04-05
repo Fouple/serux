@@ -12,7 +12,7 @@ pub struct Model {
     pub df: DocFreq,
 }
 
-/// Term frequency
+/// Term frequency 
 ///  tf(t,d), is the relative frequency of term t within document d
 pub fn compute_tf(t: &str, d: &TermFreq) -> f32 {
     // a:  f(t,d) is the raw count of a term in a document
