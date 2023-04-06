@@ -35,7 +35,7 @@ fn serve_static_file(request: Request, file_path: &str, content_type: &str) -> i
     request.respond(Response::from_file(file).with_header(content_type_header))
 }
 
-fn serve_api_search(model: &Model, mut request: Request) -> io::Result<()> {
+fn serve_api_search(model: &impl Model, mut request: Request) -> io::Result<()> {
     let mut buf = Vec::new();
     if let Err(err) = request.as_reader().read_to_end(&mut buf) {
         eprintln!("ERROR: could not read the body of request: {err}");
@@ -50,7 +50,7 @@ fn serve_api_search(model: &Model, mut request: Request) -> io::Result<()> {
         }
     };
 
-    let results = search_query(&model, &body);
+    let results = model.search_query(&body);
 
     let json = match serde_json::to_string(&results.iter().take(20).collect::<Vec<_>>()) {
         Ok(json) => json,
@@ -65,7 +65,7 @@ fn serve_api_search(model: &Model, mut request: Request) -> io::Result<()> {
     request.respond(Response::from_string(&json).with_header(content_type_header))
 }
 
-fn serve_request(model: &Model, request: Request) -> io::Result<()> {
+fn serve_request(model: &impl Model, request: Request) -> io::Result<()> {
     println!("INFO: received request! method: {:?}, url: {:?}", request.method(), request.url());
 
     match (request.method(), request.url()) {
@@ -87,7 +87,7 @@ fn serve_request(model: &Model, request: Request) -> io::Result<()> {
     }
 }
 
-pub fn start(address: &str, model: &Model) -> Result<(), ()> {
+pub fn start(address: &str, model: &impl Model) -> Result<(), ()> {
     let server = Server::http(&address).map_err(|err| {
         eprintln!("ERROR: could not start HTTP server at {address}: {err}");
     })?;
@@ -95,8 +95,7 @@ pub fn start(address: &str, model: &Model) -> Result<(), ()> {
     println!("INFO: listening at http://{address}/");
 
     for request in server.incoming_requests() {
-        // TODO: serve custom 500 in case of an error
-        serve_request(&model, request).map_err(|err| {
+        serve_request(model, request).map_err(|err| {
             eprintln!("ERROR: could not serve the response: {err}");
         }).ok();
     }
