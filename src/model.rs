@@ -86,11 +86,13 @@ impl Model for SqliteModel {
             };
             let mut stmt = self.connection.prepare(query).map_err(log_err)?;
             stmt.bind_iter::<_,(_,sqlite::Value)>([
-                (":path", path.to_str().unwrap()),
+                (":path", path.to_str().unwrap().into()),
                 (":count", (terms.len() as i64).into()),
             ]).map_err(log_err)?;
             stmt.next().map_err(log_err)?;
-
+            unsafe {
+                sqlite3_sys::sqlite3_last_insert_rowid(self.connection.as_raw())
+            }
         };
 
 

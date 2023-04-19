@@ -8,7 +8,6 @@ use std::io::{BufReader, BufWriter};
 use xml::reader::{EventReader, XmlEvent};
 use xml::common::{Position, TextPosition};
 
-#[allow(warnings)]
 mod snowball;
 
 mod model;

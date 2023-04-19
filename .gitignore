@@ -1,4 +1,6 @@
 /target
 .idea
+.vscode
+/*.gl
 *.db
 *.json
